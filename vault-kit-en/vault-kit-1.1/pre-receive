@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+zero=$(git hash-object --stdin </dev/null | tr '0-9a-f' '0')
+append_only=("4 - Archives/raw/" "3 - Resources/agents/evaluations/" "3 - Resources/evals/results/")
+
+refuse() { echo "origin refused: $*" >&2; exit 1; }
+
+while read -r old new ref; do
+  [[ "$ref" == refs/heads/main ]] || continue
+  [[ "$new" != "$zero" ]] || refuse "main is never deleted"
+
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+  yardstick="$new"
+  changed=()
+  if [[ "$old" != "$zero" ]]; then
+    git merge-base --is-ancestor "$old" "$new" || refuse "main is never rewritten"
+    forbidden=$(git diff --name-status --no-renames "$old" "$new" -- "${append_only[@]}" | grep -v '^A' || true)
+    [[ -z "$forbidden" ]] || refuse "append-only folders changed:"$'\n'"$forbidden"
+    yardstick="$old"
+    git diff --name-only --no-renames "$old" "$new" > "$tmp/.changed"
+    changed=(--changed .changed)
+  fi
+
+  git archive "$new" -- . ':(exclude)4 - Archives/raw/sessions' | tar -x -C "$tmp"
+  git show "$yardstick:.claude/scripts/validate_vault.py" > "$tmp/.validator.py"
+  git show "$yardstick:3 - Resources/evals/lint.toml" > "$tmp/.rules.toml" 2>/dev/null || : > "$tmp/.rules.toml"
+  if ! (cd "$tmp" && python3 .validator.py --rules .rules.toml ${changed[@]+"${changed[@]}"} >&2); then
+    refuse "main's validator and rules ($yardstick) rejected $new"
+  fi
+  rm -rf "$tmp"
+  trap - EXIT
+done

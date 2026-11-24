@@ -1,0 +1,27 @@
+[[rule]]
+id = "R001"
+where = "2 - Wiki/claims/*"
+pattern = '(?i)\b(maybe|perhaps|probably|it seems|i think)\b'
+level = "warning"
+message = "an atomic claim does not hedge: adjust the confidence or record it as an open Q"
+
+[[rule]]
+id = "R002"
+where = "2 - Wiki/*"
+pattern = '(?i)\b(yesterday|tomorrow|last week|last month|today)\b'
+level = "warning"
+message = "a relative date ages: use the source's absolute date"
+
+[[rule]]
+id = "R003"
+where = "*"
+pattern = '\b(TODO|FIXME|XXX)\b'
+level = "error"
+message = "loose to-do: turn it into an activity A or a question Q"
+
+[[rule]]
+id = "R004"
+where = "2 - Wiki/claims/*"
+pattern = 'https?://'
+level = "warning"
+message = "external link in a claim: register the page as a source S and cite the id"

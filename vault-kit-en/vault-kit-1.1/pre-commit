@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+append_only=("4 - Archives/raw/" "3 - Resources/agents/evaluations/" "3 - Resources/evals/results/")
+
+forbidden=$(git diff --cached --name-status --no-renames -- "${append_only[@]}" | grep -v '^A' || true)
+if [[ -n "$forbidden" ]]; then
+  echo "Append-only folders (${append_only[*]}). Changes forbidden in this commit:" >&2
+  echo "$forbidden" >&2
+  exit 1
+fi
+
+git diff --cached --name-only --no-renames | python3 .claude/scripts/validate_vault.py --changed -
