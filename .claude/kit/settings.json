@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "opus",
+  "fallbackModel": [
+    "fable"
+  ],
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    },
+    "claude-fable-5-2": {
+      "effortLevel": "xhigh"
+    },
+    "claude-sonnet-5-5": {
+      "effortLevel": "high"
+    }
+  },
+  "cleanupPeriodDays": 36500,
+  "autoMemoryEnabled": false,
+  "permissions": {
+    "deny": [
+      "Edit(/4 - Archives/raw/**)",
+      "Edit(/3 - Resources/evals/**)",
+      "Edit(/3 - Resources/agents/**)",
+      "Edit(/0 - Inbox/mcp/**)",
+      "Edit(~/.claude/projects/**)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Bash(git commit --no-verify *)",
+      "Bash(claude purge *)"
+    ],
+    "ask": [
+      "Edit(/CLAUDE.md)",
+      "Edit(/.claude/**)",
+      "Edit(/3 - Resources/templates/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/archive_session.py",
+            "args": [],
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/scripts/facts.py",
+            "args": [
+              "context"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard.py",
+            "args": []
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/scripts/validate_vault.py",
+            "args": [
+              "--hook"
+            ]
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*([Ss]lack|[Oo]utlook|[Gg]ranola|365)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/capture_mcp.py",
+            "args": []
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/archive_session.py",
+            "args": [],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

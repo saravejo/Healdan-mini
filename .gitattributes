@@ -1,0 +1,3 @@
+log.md merge=union
+index.md merge=union
+*.jsonl -diff

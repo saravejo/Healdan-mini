@@ -1,0 +1,10 @@
+[[question]]
+id = "q001"
+text = "Which port does the Local REST API plugin's MCP use over HTTPS?"
+expected_notes = ["F0001"]
+facts = ["27124"]
+
+[[question]]
+id = "q002"
+text = "What was project X's 2019 budget?"
+expected_notes = []

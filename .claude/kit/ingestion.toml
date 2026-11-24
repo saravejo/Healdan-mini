@@ -1,0 +1,23 @@
+[[map]]
+origin = "mcp:slack"
+key = "channel"
+value = "proj-alfa"
+project = "alfa"
+
+[[map]]
+origin = "mcp:granola"
+key = "meeting title"
+value = "Alfa | weekly"
+project = "alfa"
+
+[[map]]
+origin = "mcp:outlook"
+key = "sender"
+value = "@client-alfa.com"
+project = "alfa"
+
+[[map]]
+origin = "document"
+key = "text"
+value = "Project Alfa"
+project = "alfa"
